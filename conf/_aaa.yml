@@ -1,0 +1,57 @@
+# ----------------
+# Privileges
+# ----------------
+superuser:
+    type: p
+    level: 9999
+
+sys-admin:
+    type: p
+    level: 8888
+
+# ---------------
+# Rights
+# ---------------
+
+manage-user-profile:
+    type: ri
+
+manage-my-profile:
+    type: ri
+    dynamic: true
+
+# ------------------
+# Roles
+# ------------------
+
+user-manager:
+    type: ro
+    rights:
+        - manage-user-profile
+
+client:
+    type: ro
+    rights:
+        - manage-my-profile
+
+# ------------------
+# Users
+# ------------------
+
+root:
+    password: xxxxx
+    privilege: superuser
+
+admin:
+    privilege: sys-admin
+    password: xxx
+
+josh:
+    password: xxx
+    roles:
+        - user-manager
+
+mary:
+    password: ooooo
+    roles:
+        - client
