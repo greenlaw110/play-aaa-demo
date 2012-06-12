@@ -40,6 +40,7 @@ public class Profile extends Model {
     @OnAdd
     @RequirePrivilege("sys-admin")
     @RequireRight("manage-my-profile")
+    @RequireAccounting("create new profile")
     public void createUserAccount() {
         Logger.info("saving new profile and create user account for it");
         IAccount account = findAccountByUsername(username);
@@ -53,6 +54,7 @@ public class Profile extends Model {
     @OnUpdate
     @RequirePrivilege("sys-admin")
     @RequireRight("manage-my-profile")
+    @RequireAccounting("update profile")
     public void checkUpdateAccess() {
         Logger.info("checking update access");
     }
