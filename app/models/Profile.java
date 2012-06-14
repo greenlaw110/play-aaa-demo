@@ -11,7 +11,7 @@ import play.modules.morphia.Model;
  * A User Profile
  */
 @Entity(value = "profile", noClassnameStored = true)
-public class Profile extends Model {
+public class Profile extends Model implements IDynamicRightAsset {
     public String fullName;
 
     public String username;
@@ -55,8 +55,8 @@ public class Profile extends Model {
     @RequirePrivilege("sys-admin")
     @RequireRight("manage-my-profile")
     @RequireAccounting("update profile")
-    public void checkUpdateAccess() {
-        Logger.info("checking update access");
+    void checkUpdateAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking update access");
     }
 
     @RequirePrivilege("sys-admin")
@@ -67,10 +67,16 @@ public class Profile extends Model {
         account.setPassword(password)._save();
     }
 
-    public static class DynamicAccessChecker implements PlayDynamicRightChecker.IAccessChecker<Profile> {
-        @Override
-        public boolean hasAccess(IAccount account, Profile profile) {
-            return (account.getName().equals(profile.username));
-        }
+    @RequireAccounting("delete profile")
+    @RequirePrivilege("sys-admin")
+    @RequireRight("manage-user-profile")
+    void checkDeleteAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking delete access");
     }
+
+    @Override
+    public Profile owner() {
+        return this;
+    }
+
 }
