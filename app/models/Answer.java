@@ -47,8 +47,8 @@ public class Answer extends Model implements IDynamicRightAsset {
     @RequireRight("manage-my-answer")
     @AllowSystemAccount
     @OnDelete
-    @OnBatchDelete
     void checkDeleteAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking delete access to Answer");
     }
+
 }
