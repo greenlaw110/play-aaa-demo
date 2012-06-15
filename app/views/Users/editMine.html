@@ -1,0 +1,20 @@
+#{extends 'main.html' /}
+#{set title:'Edit my profile' /}
+
+<form action="@{Users.update}">
+<label>Username: </label> ${current.username}
+<br/>
+<label>FullName</label>
+<br/>
+<input type="text" name="fullName" value="${current.fullName}" />
+<br/>
+<label>Original Password</label>
+<br/>
+<input type="text" name="oriPassword" /> Keep blank if you don't want to modify your password
+<br/>
+<label>New password</label>
+<br/>
+<input type="text" name="newPassword" />
+<br/>
+<input type="submit" value="Update" />
+</form>

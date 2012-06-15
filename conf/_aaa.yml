@@ -19,6 +19,18 @@ manage-user-profile:
 manage-my-profile:
     type: ri
     dynamic: true
+    
+answer:
+    type: ri
+
+manage-my-answer:
+    type: ri
+
+ask-question:
+    type: ri
+
+manage-my-question:
+    type: ri
 
 # ------------------
 # Roles

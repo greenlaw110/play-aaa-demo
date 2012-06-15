@@ -1,0 +1,24 @@
+#{extends 'main.html' /}
+#{set title:'Ask Question' /}
+
+#{ifErrors}
+Oops, something is wrong:
+<ul>
+#{errors}
+<li>${error}</li>
+#{/errors}
+</ul>
+#{/ifErrors}
+
+<form action="@{Questions.create}">
+<legend>Ask Question</legend>
+<label>Title</label>
+<br />
+<input type="text" name="title" value="${flash.title}" size="60" />
+<br />
+<label>Content</label>
+<br />
+<textarea name="content" rows="6" cols="60">${flash.content}</textarea>
+<br />
+<input type="submit" value="Submit" />
+</form>

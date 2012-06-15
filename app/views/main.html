@@ -8,9 +8,58 @@
         #{get 'moreStyles' /}
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
         <script src="@{'/public/javascripts/jquery-1.6.4.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+        <style>
+        #HEADER {
+        	font-size: 30px;
+        	line-height: 80px;
+        }
+        #SUCCESS {
+        	background-color: green;
+        	color: white;
+        	padding: 10px;
+        }
+        #ERROR {
+        	background-color: red;
+        	color: white;
+        	padding: 10px;
+        }
+        </style>
         #{get 'moreScripts' /}
     </head>
     <body>
+    	#{if flash.success}
+    	<div id="SUCCESS">${flash.success}</div>
+    	#{/if}
+    	#{if flash.error}
+    	<div id="ERROR">${flash.error}</div>
+    	#{/if}
+    	<div id="HEADER">Simple Question and Answers (play-aaa demo)</div>
+    	<hr />
+    	<a href="@{Application.index}">Index</a>
+    	|
+    	#{if current }
+    	Welcome, ${current.fullName}
+    	<a href="@{Users.editMine}">Edit profile</a>
+    	<a href="@{Secure.logout}">Logout</a>
+    	#{/if}
+    	#{else}
+    	<a href="@{Application.register}">Register</a>
+    	<a href="@{Secure.login}">Login</a>
+    	#{/else}
+    	|
+    	<a href="@{Questions.ask}">Ask question</a>
+    	<hr />
         #{doLayout /}
+        
+        #{if current}
+        <hr />
+        <div id="DEBUG">
+        	<ul>
+        	<li>${current.account.name}</li>
+        	<li>${current.account.roles}</li>
+        	<li>${current.account.privilege}</li>
+        	</ul>
+        </div>
+        #{/if}
     </body>
 </html>

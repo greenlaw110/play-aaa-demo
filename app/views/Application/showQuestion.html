@@ -1,0 +1,47 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+#{set 'moreStyles'}
+<style>
+#question .content {
+	padding: 10px;
+	background-color: #F6F6F6
+}
+#answers {
+	margin: 20px;
+}
+</style>
+#{/set}
+
+<div id="question">
+<h1>${question.title}</h1>
+<div class="content">${question.content}</div>
+<div>
+Ask by ${question.user.fullName} at ${question.createdAt.format('yyyy-MM-dd HH:mm:ss')}
+<a href="@{Questions.edit(question.id)}">Edit</a>
+<a href="@{Questions.delete(question.id)}">Delete</a>
+</div>
+</div>
+
+<div id="answers">
+There are ${question.answers.size()} answers.
+<ul>
+#{list question.answers, as: 'answer'}
+<li>${answer.content} by ${answer.user.fullName}
+<a href="@{Answers.edit(answer.id)}">Edit</a>
+<a href="@{Answers.delete(answer.id)}">Delete</a>
+</li>
+#{/list}
+</ul>
+</div>
+
+<div id="answer">
+<form action="@{Answers.create}">
+	<input type="hidden" name="questionId" value="${question.id}" />
+	<textarea name="content" rows="10" cols="60"></textarea>
+	<br/>
+	<input type="submit" value="Answer" />
+</form>
+</div>
+
+
