@@ -1,4 +1,11 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-#{welcome /}
+<ul>
+#{list questions, as: 'question'}
+<li><a href="@{Application.showQuestion(question.id)}">${question.title}</a></li>
+#{/list}
+#{else}
+<li>No question yet</li>
+#{/else}
+</ul>

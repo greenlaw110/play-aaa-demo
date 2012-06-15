@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set title:'Edit question' /}
+
+<form action="@{Questions.update}">
+<input type="hidden" name="id" value="${question.id}" />
+<legend>Edit Question</legend>
+<label>Title</label>
+<br />
+<input type="text" name="title" size="60" value="${question.title}" />
+<br />
+<label>Content</label>
+<br />
+<textarea name="content" rows="6" cols="60">${question.content}</textarea>
+<br />
+<input type="submit" value="Update" />
+</form>

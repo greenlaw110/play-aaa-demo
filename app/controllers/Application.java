@@ -1,16 +1,30 @@
 package controllers;
 
-import play.*;
-import play.mvc.*;
+import java.util.List;
 
-import java.util.*;
+import models.Question;
+import models.User;
 
-import models.*;
+public class Application extends BaseController {
 
-public class Application extends Controller {
+	public static void index() {
+		List<Question> questions = Question.findAll();
+		render(questions);
+	}
 
-    public static void index() {
-        CRUD.index();
-    }
+	public static void showQuestion(String id) {
+		Question question = Question.findById(id);
+		render(question);
+	}
+
+	public static void register() {
+		render();
+	}
+
+	public static void createUser(String username, String password, String fullName) {
+		User user = new User(username, password, fullName);
+		user.save();
+		index();
+	}
 
 }
