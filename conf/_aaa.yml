@@ -32,6 +32,20 @@ ask-question:
 manage-my-question:
     type: ri
 
+manage-my-question:
+    type: ri
+    dynamic: true
+
+manage-my-answer:
+    type: ri
+    dynamic: true
+
+ask-question:
+    type: ri
+
+answer-question:
+    type: ri
+
 # ------------------
 # Roles
 # ------------------
@@ -45,6 +59,10 @@ client:
     type: ro
     rights:
         - manage-my-profile
+        - manage-my-question
+        - manage-my-answer
+        - create-question
+        - answer-question
 
 # ------------------
 # Users

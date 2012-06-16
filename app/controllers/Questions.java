@@ -1,17 +1,21 @@
 package controllers;
 
+import controllers.aaa.AAAExceptionHandler;
+import controllers.filters.AuthentityChecker;
 import models.Question;
+import models.User;
+import play.mvc.Controller;
 import play.mvc.With;
 
-@With({ Secure.class })
-public class Questions extends BaseController {
+@With({ Secure.class, AAAExceptionHandler.class, AuthentityChecker.class})
+public class Questions extends Controller {
 
 	public static void ask() {
 		render();
 	}
 
 	public static void create(String title, String content) {
-		Question question = new Question(current(), title, content);
+		Question question = new Question(User.current(), title, content);
 		if (question.validateAndCreate()) {
 			flash.success("Question created");
 			Application.showQuestion(question.getId().toString());

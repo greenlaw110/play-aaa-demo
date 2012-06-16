@@ -4,8 +4,9 @@ import java.util.List;
 
 import models.Question;
 import models.User;
+import play.mvc.Controller;
 
-public class Application extends BaseController {
+public class Application extends Controller {
 
 	public static void index() {
 		List<Question> questions = Question.findAll();

@@ -1,82 +1,61 @@
 package models;
 
-import java.util.ArrayList;
-
+import com.google.code.morphia.annotations.Entity;
 import play.Logger;
-import play.data.validation.Required;
-import play.jobs.Job;
 import play.modules.aaa.AllowSystemAccount;
 import play.modules.aaa.RequireAccounting;
+import play.modules.aaa.RequirePrivilege;
 import play.modules.aaa.RequireRight;
 import play.modules.morphia.Model;
 
-import com.google.code.morphia.annotations.Entity;
+/**
+ * Created with IntelliJ IDEA.
+ * User: luog
+ * Date: 15/06/12
+ * Time: 6:11 AM
+ * To change this template use File | Settings | File Templates.
+ */
+@Entity(value="a", noClassnameStored = true)
+public class Answer extends Model implements IUserProperty {
+    @Column("ctnt")
+    public String content;
+    @Column("q")
+    public String questionId;
 
-@Entity("answers")
-public class Answer extends Model {
+    public Answer(User user, Question question, String content) {
+        ownerId = user.getId().toString();
+        questionId = question.getId().toString();
+        this.content = content;
+    }
 
-	@Required
-	public String content;
+    public Question question() {
+        return Question.findById(questionId);
+    }
+    public String ownerId;
+    @Override
+    public User owner() {
+        return User.findById(ownerId);
+    }
 
-	@Required
-	public Question question;
+    @OnAdd
+    @RequireRight("answer-question")
+    void checkAddAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking add access to Answer");
+    }
 
-	@Required
-	public User user;
+    @OnUpdate
+    @RequireRight("manage-my-answer")
+    void checkUpdateAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking update access to Answer");
+    }
 
-	public Answer() {
-	}
-
-	public Answer(User user, Question question, String content) {
-		this.user = user;
-		this.question = question;
-		this.content = content;
-	}
-
-	@OnAdd
-	@RequireRight("answer")
-	void onAdd() {
-		if (Logger.isTraceEnabled()) {
-			Logger.trace("checking add access to Answer");
-		}
-	}
-
-	@Added
-	void cascadeAdd() {
-		final Answer self = this;
-		new Job() {
-			@Override
-			public void doJob() throws Exception {
-				if (question.answers == null) {
-					question.answers = new ArrayList<Answer>();
-				}
-				if (!question.answers.contains(self)) {
-					question.answers.add(self);
-					question.save();
-				}
-			}
-		}.now();
-	}
-
-	@OnUpdate
-	@RequireRight("manage-my-answer")
-	void onUpdate() {
-		if (Logger.isTraceEnabled()) {
-			Logger.trace("checking update access to Answer");
-		}
-	}
-
-	@OnDelete
-	@RequireRight("manage-my-answer")
-	@AllowSystemAccount
-	@RequireAccounting("delete answer")
-	void cascadeDelete() {
-		new Job() {
-			public void run() {
-				question.answers.remove(this);
-				question.save();
-			};
-		}.now();
-	}
+    @RequireAccounting("delete answer")
+    @RequirePrivilege("sys-admin")
+    @RequireRight("manage-my-answer")
+    @AllowSystemAccount
+    @OnDelete
+    void checkDeleteAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking delete access to Answer");
+    }
 
 }

@@ -1,136 +1,105 @@
 package models;
 
-import org.apache.commons.lang.StringUtils;
-
+import com.google.code.morphia.annotations.Entity;
+import com.greenlaw110.play.api.IUser;
+import controllers.filters.Config;
 import play.Logger;
 import play.data.validation.Password;
 import play.data.validation.Required;
-import play.libs.Crypto;
-import play.modules.aaa.IAccount;
-import play.modules.aaa.IRole;
-import play.modules.aaa.PlayDynamicRightChecker;
-import play.modules.aaa.RequireAccounting;
-import play.modules.aaa.RequirePrivilege;
-import play.modules.aaa.RequireRight;
+import play.modules.aaa.*;
 import play.modules.aaa.utils.AAAFactory;
 import play.modules.morphia.Model;
-
-import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Transient;
+import play.modules.morphia.validation.Unique;
+import sys.App;
 
 /**
  * A User Profile
  */
-@Entity(value = "users", noClassnameStored = true)
-public class User extends Model {
+@Entity(value = "user", noClassnameStored = true)
+public class User extends Model implements IUserProperty, IUser {
+    @Required
+    public String fullName;
 
-	@Required
-	public String username;
+    @Required
+    @Unique
+    public String username;
 
-	@Required
-	@Password
-	public String password;
+    @Required
+    @Password
+    transient public String password;
 
-	@Required
-	public String fullName;
+    public User(String username, String password, String fullName) {
+        this.username = username;
+        this.fullName = fullName;
+        this.password = password;
+    }
 
-	/**
-	 * Hold the raw password for later use. Won't save to db.
-	 */
-	@Transient
-	private String rawPassword;
+    @Override
+    public User owner() {
+        return this;
+    }
 
-	public User(String username, String password, String fullName) {
-		this.username = username;
-		this.fullName = fullName;
-		if (StringUtils.isNotBlank(password)) {
-			resetPassword(password);
-		}
-	}
+    public static User current() {
+        return (User)Config.app.currentUser();
+    }
 
-	public void setUsername(String username) {
-		if (!isNew()) {
-			if (this.username.equals(username))
-				return;
-			throw new IllegalStateException("Cannot change username");
-		}
-		checkUsername(username);
-		this.username = username;
-	}
+    private static IAccount findAccountByUsername(String username) {
+        return (IAccount)AAAFactory.account()._findById(username);
+    }
 
-	public void resetPassword(String password) {
-		this.rawPassword = password;
-		this.password = cryptPassword(password);
-	}
+    public static User findByUsername(String username) {
+        return User.find("username", username).get();
+    }
 
-	public boolean checkPassword(String password) {
-		return this.password.equals(cryptPassword(password));
-	}
+    private void checkUsername(String username) {
+        IAccount account = findAccountByUsername(username);
+        if (null != account) throw new RuntimeException("username already exists");
+    }
 
-	public IAccount getAccount() {
-		return findAccountByUsername(username);
-	}
+    public void setUsername(String username) {
+        if (!isNew()) {
+            if (this.username.equals(username)) return;
+            throw new IllegalStateException("Cannot change username");
+        }
+        checkUsername(username);
+        this.username = username;
+    }
 
-	@Override
-	public String toString() {
-		return username;
-	}
+    @OnAdd
+    //allow registration @RequirePrivilege("sys-admin")
+    //allow registration @RequireRight("manage-my-profile")
+    @RequireAccounting("create new profile")
+    public void createUserAccount() {
+        Logger.info("saving new profile and create user account for it");
+        IAccount account = findAccountByUsername(username);
+        if (null != account) throw new RuntimeException("username already exists");
+        checkUsername(username);
+        account = AAAFactory.account().create(username);
+        IRole role = (IRole)AAAFactory.role()._findById("client");
+        account.assignRole(role).setPassword(password)._save();
+    }
 
-	@OnAdd
-	@RequireAccounting("create new profile")
-	void createUserAccount() {
-		Logger.info("saving new profile and create user account for it");
-		IAccount account = getAccount();
-		if (null != account)
-			throw new RuntimeException("username already exists");
-		checkUsername(username);
-		account = AAAFactory.account().create(username);
-		IRole role = (IRole) AAAFactory.role()._findById("client");
-		account.assignRole(role);
-		if (this.rawPassword != null) {
-			account.setPassword(this.rawPassword);
-		}
-		account._save();
-	}
+    @OnUpdate
+    @RequirePrivilege("sys-admin")
+    @RequireRight("manage-my-profile")
+    @RequireAccounting("update profile")
+    void checkUpdateAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking update access");
+    }
 
-	@OnUpdate
-	@RequirePrivilege("sys-admin")
-	@RequireRight("manage-my-profile")
-	@RequireAccounting("update profile")
-	void checkUpdateAccess() {
-		Logger.info("checking update access");
-		if (this.rawPassword != null) {
-			IAccount account = getAccount();
-			account.setPassword(this.rawPassword)._save();
-		}
-	}
+    @RequirePrivilege("sys-admin")
+    @RequireRight("manage-my-profile")
+    @RequireAccounting("reset password")
+    public void resetPassword(String password) {
+        IAccount account = findAccountByUsername(username);
+        account.setPassword(password)._save();
+    }
 
-	@OnDelete
-	@RequirePrivilege("sys-admin")
-	@RequireAccounting("delete user")
-	void checkDeleteAccess() {
-		Logger.info("checking delete access");
-	}
-
-	private String cryptPassword(String password) {
-		return Crypto.passwordHash(password + ":" + username + ":" + password);
-	}
-
-	private void checkUsername(String username) {
-		long count = count("username", username);
-		if (count > 0)
-			throw new RuntimeException("username already exists");
-	}
-
-	private static IAccount findAccountByUsername(String username) {
-		return (IAccount) AAAFactory.account()._findById(username);
-	}
-
-	public static class DynamicAccessChecker implements PlayDynamicRightChecker.IAccessChecker<User> {
-		@Override
-		public boolean hasAccess(IAccount account, User user) {
-			return account.getName().equals(user.username);
-		}
-	}
+    @RequireAccounting("delete profile")
+    @RequirePrivilege("sys-admin")
+    @RequireRight("manage-user-profile")
+    void checkDeleteAccess() {
+        if (Logger.isTraceEnabled()) Logger.trace("checking delete access");
+    }
 
 }
