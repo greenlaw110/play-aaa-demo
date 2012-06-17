@@ -17,17 +17,17 @@
 <h1>${question.title}</h1>
 <div class="content">${question.content}</div>
 <div>
-Ask by ${question.user.fullName} at ${question.createdAt.format('yyyy-MM-dd HH:mm:ss')}
+Ask by ${question.owner().fullName} at ${question._created.format('yyyy-MM-dd HH:mm:ss')}
 <a href="@{Questions.edit(question.id)}">Edit</a>
 <a href="@{Questions.delete(question.id)}">Delete</a>
 </div>
 </div>
 
 <div id="answers">
-There are ${question.answers.size()} answers.
+There are ${question.answers().size()} answers.
 <ul>
-#{list question.answers, as: 'answer'}
-<li>${answer.content} by ${answer.user.fullName}
+#{list question.answers(), as: 'answer'}
+<li>${answer.content} by ${answer.owner().fullName}
 <a href="@{Answers.edit(answer.id)}">Edit</a>
 <a href="@{Answers.delete(answer.id)}">Delete</a>
 </li>

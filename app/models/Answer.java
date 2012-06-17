@@ -39,22 +39,22 @@ public class Answer extends Model implements IUserProperty {
 
     @OnAdd
     @RequireRight("answer-question")
-    void checkAddAccess() {
+    public void checkAddAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking add access to Answer");
     }
 
     @OnUpdate
     @RequireRight("manage-my-answer")
-    void checkUpdateAccess() {
+    public void checkUpdateAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking update access to Answer");
     }
 
     @RequireAccounting("delete answer")
-    @RequirePrivilege("sys-admin")
+    @RequirePrivilege("superuser")
     @RequireRight("manage-my-answer")
     @AllowSystemAccount
     @OnDelete
-    void checkDeleteAccess() {
+    public void checkDeleteAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking delete access to Answer");
     }
 

@@ -44,13 +44,13 @@ public class Question extends Model implements IUserProperty {
 
     @OnAdd
     @RequireRight("ask-question")
-    void checkAddAccess() {
+    public void checkAddAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking add access to Question");
     }
 
     @OnUpdate
     @RequireRight("manage-my-question")
-    void checkUpdateAccess() {
+    public void checkUpdateAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking update access to Question");
     }
 
@@ -58,18 +58,18 @@ public class Question extends Model implements IUserProperty {
     @RequireRight("manage-my-question")
     @AllowSystemAccount
     @OnDelete
-    void checkDeleteAccess() {
+    public void checkDeleteAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking delete access to Question");
     }
 
     @Deleted
-    void cascadeDelete() {
+    public void cascadeDelete() {
         // create job to cascade delete so that @AllowSystemAccount could be leveraged
         new Job(){
             @Override
             public void doJob() throws Exception {
-                Object id = getId();
-                Answer.q("questionId", id).delete();
+                Object id = Question.this.getId();
+                Answer.q("questionId", id.toString()).delete();
             }
         }.now();
     }
@@ -87,7 +87,7 @@ public class Question extends Model implements IUserProperty {
      * @param q
      */
     @OnBatchDelete
-    static void cascadeDelete(MorphiaQuery q) {
+    public static void cascadeDelete(MorphiaQuery q) {
         List<Key<Question>> keys = q.asKeyList();
         final List<String> qidList = new ArrayList<String>();
         for (Key<Question> key: keys) {

@@ -1,6 +1,7 @@
 package models;
 
 import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Transient;
 import com.greenlaw110.play.api.IUser;
 import controllers.filters.Config;
 import play.Logger;
@@ -26,7 +27,8 @@ public class User extends Model implements IUserProperty, IUser {
 
     @Required
     @Password
-    transient public String password;
+    @Transient
+    public String password;
 
     public User(String username, String password, String fullName) {
         this.username = username;
@@ -66,7 +68,7 @@ public class User extends Model implements IUserProperty, IUser {
     }
 
     @OnAdd
-    //allow registration @RequirePrivilege("sys-admin")
+    //allow registration @RequirePrivilege("superuser")
     //allow registration @RequireRight("manage-my-profile")
     @RequireAccounting("create new profile")
     public void createUserAccount() {
@@ -80,14 +82,14 @@ public class User extends Model implements IUserProperty, IUser {
     }
 
     @OnUpdate
-    @RequirePrivilege("sys-admin")
+    @RequirePrivilege("superuser")
     @RequireRight("manage-my-profile")
     @RequireAccounting("update profile")
     void checkUpdateAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking update access");
     }
 
-    @RequirePrivilege("sys-admin")
+    @RequirePrivilege("superuser")
     @RequireRight("manage-my-profile")
     @RequireAccounting("reset password")
     public void resetPassword(String password) {
@@ -96,7 +98,7 @@ public class User extends Model implements IUserProperty, IUser {
     }
 
     @RequireAccounting("delete profile")
-    @RequirePrivilege("sys-admin")
+    @RequirePrivilege("superuser")
     @RequireRight("manage-user-profile")
     void checkDeleteAccess() {
         if (Logger.isTraceEnabled()) Logger.trace("checking delete access");

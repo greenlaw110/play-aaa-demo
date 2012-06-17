@@ -15,6 +15,7 @@ public class Application extends Controller {
 
 	public static void showQuestion(String id) {
 		Question question = Question.findById(id);
+		notFoundIfNull(question);
 		render(question);
 	}
 

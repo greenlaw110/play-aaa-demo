@@ -28,11 +28,13 @@ public class Answers extends Controller {
 
 	public static void edit(String id) {
 		Answer answer = Answer.findById(id);
+		notFoundIfNull(answer);
 		render(answer);
 	}
 
 	public static void update(String id, String content) {
 		Answer answer = Answer.findById(id);
+		notFoundIfNull(answer);
 		answer.content = content;
 		answer.save();
 		flash.success("Answer updated");
@@ -41,6 +43,7 @@ public class Answers extends Controller {
 
 	public static void delete(String id) {
 		Answer answer = Answer.findById(id);
+		notFoundIfNull(answer);
 		answer.delete();
 		flash.success("Answer deleted");
 		Application.showQuestion(answer.questionId);
